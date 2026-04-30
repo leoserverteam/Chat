@@ -1,0 +1,31 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Database
+postgresdata/
+
+# Synapse data
+synapse/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Certificates (usually managed by certbot)
+/etc/letsencrypt/
+certbot-data/
+
+# Node modules (if any)
+node_modules/

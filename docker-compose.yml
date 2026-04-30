@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: synapse
+    volumes:
+      - /mnt/Share/chat/synapse:/data
+    environment:
+      - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+      - SYNAPSE_SERVER_NAME=${SYNAPSE_SERVER_NAME:-matrix.leonet.site}
+      - SYNAPSE_REPORT_STATS=${SYNAPSE_REPORT_STATS:-yes}
+    networks:
+      - matrix-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8008/_synapse/admin/v1/server_version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: synapse-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-synapse}
+      - POSTGRES_USER=${POSTGRES_USER:-synapse}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-synapse_secure_password}
+    volumes:
+      - /mnt/Share/chat/postgres:/var/lib/postgresql/data
+    networks:
+      - matrix-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-synapse}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  element:
+    image: vectorim/element-web:latest
+    container_name: element
+    volumes:
+      - ./element-config.json:/app/config.json:ro
+    networks:
+      - matrix-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit
+    command: --config /etc/livekit.yaml
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+      - /mnt/Share/chat/livekit:/tmp/livekit
+    networks:
+      - matrix-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7880/livekitconfig"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  matrix-network:
+    driver: bridge
+

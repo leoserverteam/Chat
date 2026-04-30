@@ -1,0 +1,73 @@
+name: Lint & Test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - develop
+
+jobs:
+  lint:
+    name: Lint Configuration Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate YAML
+        run: |
+          sudo apt-get update && sudo apt-get install -y yamllint
+          yamllint docker-compose.yml
+          yamllint livekit.yaml
+          echo "✓ YAML validation passed"
+
+      - name: Validate JSON
+        run: |
+          python3 -m json.tool element-config.json > /dev/null
+          echo "✓ JSON validation passed"
+
+      - name: Validate Docker Compose
+        run: |
+          docker-compose config > /dev/null
+          echo "✓ Docker Compose validation passed"
+
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+
+      - name: Check for hardcoded passwords
+        run: |
+          if grep -r "password=" .github/workflows/ || grep -r "PASSWORD=" nginx/; then
+            echo "✗ Hardcoded credentials detected!"
+            exit 1
+          fi
+          echo "✓ No hardcoded credentials found"
+
+  docs:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check README exists and has content
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "✗ README.md not found"
+            exit 1
+          fi
+          
+          echo "✓ README.md exists"
