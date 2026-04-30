@@ -1,15 +1,28 @@
 name: Deploy App
 
+env:
+  PROJECT_NAME: "Chat"
+
 on:
   push:
     branches:
       - main
 
+      
 jobs:
+  prepare-env:
+    runs-on: [self-hosted] # Укажите ваш раннер (тот же, где деплой)
+    steps:
+      - name: Create .env file
+        run: |
+          # Переходим в папку проекта и записываем секрет в .env
+          echo "PG_PASS=${{ secrets.PG_PASS }}" > ${{vars.DEPLOY_PATH}}/Chat/.env 
+
   call-deploy:
     uses: leoserverteam/DevOpsTemplates/.github/workflows/onlycompose.yml@main
     with:
       project_name: "Chat"
 
   call-nginx:
+    needs: [call-deploy]
     uses: leoserverteam/DevOpsTemplates/.github/workflows/deploynginx.yml@main
