@@ -19,6 +19,7 @@ jobs:
           echo "PG_PASS=${{ secrets.PG_PASS }}" > ${{vars.DEPLOY_PATH}}/Chat/.env 
 
   call-deploy:
+    needs: [prepare-env]
     uses: leoserverteam/DevOpsTemplates/.github/workflows/onlycompose.yml@main
     with:
       project_name: "Chat"
