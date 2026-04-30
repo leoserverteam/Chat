@@ -1,0 +1,15 @@
+name: Deploy App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  call-deploy:
+    uses: leoserverteam/DevOpsTemplates/.github/workflows/onlycompose.yml@main
+    with:
+      project_name: "Chat"
+
+  call-nginx:
+    uses: leoserverteam/DevOpsTemplates/.github/workflows/deploynginx.yml@main
