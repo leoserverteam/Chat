@@ -11,9 +11,6 @@ services:
       - "8008:8008"
     extra_hosts:
       - "leonet.site:host-gateway"
-    depends_on:
-      - coturn
-      - livekit
 
   element:
     image: vectorim/element-web:latest
