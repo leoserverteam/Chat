@@ -34,19 +34,3 @@ services:
     volumes:
       - /mnt/Share/Element/postgres-data:/var/lib/postgresql/data
   
-  coturn:
-    image: coturn/coturn:latest
-    container_name: coturn
-    restart: unless-stopped
-    network_mode: "host"
-    volumes:
-      - /mnt/Share/Element/coturn/turnserver.conf:/etc/turnserver.conf:ro
-
-  livekit:
-    image: livekit/livekit-server:v1.5
-    container_name: livekit
-    restart: unless-stopped
-    network_mode: "host"
-    volumes:
-      - /mnt/Share/Element/livekit/livekit.yaml:/etc/livekit.yaml:ro
-    command: --config /etc/livekit.yaml
