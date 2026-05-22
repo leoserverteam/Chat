@@ -9,6 +9,8 @@ services:
       - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
     ports:
       - "8008:8008"
+    extra_hosts:
+      - "leonet.site:host-gateway"
 
   element:
     image: vectorim/element-web:latest
